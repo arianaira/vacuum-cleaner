@@ -1,15 +1,16 @@
 from abc import ABC, abstractmethod
 import random
+from result import Result
 
 class Abstract_Agent(ABC):
     @abstractmethod
     def __init__(self):
-
+        pass
         
     @abstractmethod
-    def action(self, percept):
+    def step(self, percept):
         pass
-    
+
     
 class Simple_Ref_Agent(Abstract_Agent):
     def __init__(self, sensors, state):
@@ -17,9 +18,10 @@ class Simple_Ref_Agent(Abstract_Agent):
         self.sensors = sensors
         self.state = state
         self.action = Action()
+        self.result = Result()
         self.directions = [Action.up, Action.down, Action.left, Action.right]
         
-    def action(self, percept):
+    def step(self, percept):
         if self.state == "on":
             # state sensor
             if "state" in self.sensors:
@@ -30,27 +32,17 @@ class Simple_Ref_Agent(Abstract_Agent):
             
             # location sensor
             if "location" in self.sensors:
-                if percept.location == [0, 1] or percept.location == [1, 0]:
-                    new_location = [0, 0]
-                elif percept.lcoation == [0, 0]:
-                    new_location = random.choice([[0, 1], [1, 0]])
+                if percept.location == [0, 1] or percept.location == (1, 0):
+                    new_location = (0, 0)
+                elif percept.lcoation == (0, 0):
+                    new_location = random.choice([(0, 1), (1, 0)])
             else:
-                new_location = self.find_valid_move(percept.location)
+                new_location = percept.location + random.choice(self.directions)
             return percept.state, new_location
                 
                 
         elif self.state == "sleep": 
             return percept.state, percept.location
-    
-    
-    def find_valid_move(self, location):
-        for move in self.directions:
-            new_location = move(location)
-            if not is_wall(new_location):
-                break
-        return new_location
-        
-        
     
 
 class Action():
@@ -61,14 +53,14 @@ class Action():
         self.state = "off"
         
     def up(self, location):
-        return location + [0, 1]
+        return location + (0, 1)
     
     def down(self, location):
-        return location + [0, -1]
+        return location + (0, -1)
     
     def right(self, location):
-        return location + [1, 0]
+        return location + (1, 0)
     
     def left(self, location):
-        return location + [-1, 0]
+        return location + (-1, 0)
         
